@@ -70,6 +70,8 @@ def _sample_ouprocess(num_sample: int,
     # Make random_state be int or None.
     if np.isnan(random_state):
         random_state = None
+    elif isinstance(random_state, float):
+        random_state = int(random_state)
 
     np.random.seed(random_state)
     y = np.random.multivariate_normal(mean, cov)
@@ -156,7 +158,15 @@ class LCSimulation():
             "lengthscale": lengthscale,
             "random_state": random_state
         }
-        self.df_ou = self.df_ou.append(ou_info, ignore_index=True)
+
+        index_add = len(self.df_ou) + 1
+        df_add = pd.DataFrame(ou_info, index=[index_add])
+
+        self.df_ou = pd.concat(
+            [self.df_ou, df_add],
+            ignore_index=True
+        )
+        # self.df_ou = self.df_ou.append(ou_info, ignore_index=True)
 
     def add_error_gaussian(self, target_lc_indices: list,
                            mean: float = 0.0, variance: float = 0.1):
@@ -186,7 +196,14 @@ class LCSimulation():
         lc_info = {"lc_id": self.lc_counter,
                    "ou_id": ou_id,
                    "lag":   lag}
-        self.df_lc = self.df_lc.append(lc_info, ignore_index=True)
+
+        index_add = len(self.df_lc) + 1
+        df_add = pd.DataFrame(lc_info, index=[index_add])
+
+        self.df_lc = pd.concat(
+            [self.df_lc, df_add],
+            ignore_index=True
+        )
         self.lc_counter += 1
 
     def sample(self, num_sample_lc: int):
